@@ -1,0 +1,22 @@
+{
+  "peer": {
+    "client_id": "peer_1",
+    "ip": "0.0.0.0",
+    "client_port": "5000",
+    "server_port": "5001",
+    "grpc_port": "50051",
+    "directory": "./shared"
+  },
+  "main_peer_friend": {
+    "ip": "0.0.0.0",
+    "port": "5000"
+  },
+  "substitute_peer_friend": {
+    "ip": "0.0.0.0",
+    "port": "5000"
+  },
+  "directory_server": {
+    "ip": "0.0.0.0",
+    "port": "6000"
+  }
+}
