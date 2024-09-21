@@ -1,6 +1,6 @@
 // src/peer.js
-const Client = require('./client/client.js');
-const Server = require('./server/server.js');
+const Client = require('./pclient/client')
+const Server = require('./pserver/server')
 
 const client = new Client();
 const server = new Server();
