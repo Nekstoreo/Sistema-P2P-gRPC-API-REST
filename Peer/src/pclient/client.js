@@ -14,6 +14,7 @@ const peer_ip = process.env.PEER_IP || 'localhost';
 const peer_port = process.env.PEER_PORT || 3000;
 const directory_server_ip = process.env.DIRECTORY_SERVER_IP || 'localhost';
 const directory_server_port = process.env.DIRECTORY_SERVER_PORT || 5000;
+const peer_directory = process.env.PEER_DIRECTORY || '/files';
 
 class Client {
   constructor() {
@@ -38,6 +39,7 @@ class Client {
         peerId: peer_id,
         ip: peer_ip,
         port: peer_port,
+        directory: peer_directory,
         files
       });
       console.log('Peer registered:', response.data);

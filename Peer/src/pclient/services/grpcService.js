@@ -50,5 +50,3 @@ function downloadFile(filename, targetPeerIp, callback) {
 }
 
 module.exports = { uploadFile, downloadFile };
-
-module.exports = { uploadFile, downloadFile };
