@@ -4,11 +4,14 @@ FROM node:20
 # Establece el directorio de trabajo en el contenedor
 WORKDIR /usr/src/app
 
-# Copia el resto de los archivos de la aplicación al directorio de trabajo
-COPY src/ .
+# Copia los archivos de dependencias antes
+COPY src/package*.json ./
 
 # Instala las dependencias
 RUN npm install
+
+# Copia el resto de los archivos de la aplicación al directorio de trabajo excepto node_modules
+COPY src/ .
 
 # Expone el puerto necesario
 EXPOSE 6000

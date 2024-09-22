@@ -10,7 +10,6 @@ const peer_directory = process.env.PEER_DIRECTORY || 'shared';
 exports.listFiles = async () => {
   try {
     const files = await fs.readdir(peer_directory);
-    console.log('Files in directory:', files);
     return { files };
   } catch (err) {
     console.error('Error reading directory:', err);

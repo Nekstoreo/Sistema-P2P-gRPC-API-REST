@@ -13,7 +13,6 @@ async function searchFile(filename) {
     const response = await axios.get(`http://${directory_server_ip}:${directory_server_port}/api/search`, {
       params: { filename }
     });
-    console.log('Search results:', response.data);
     return response.data.peers;  // Return peers that have the file
   } catch (err) {
     console.error('Search failed:', err.response?.data || err.message);
@@ -29,7 +28,6 @@ async function getPeerFiles(peerIp) {
     const response = await axios.get(`http://${directory_server_ip}:${directory_server_port}/api/files`, {
       params: { peerIp }
     });
-    console.log('Peer files:', response.data);
     return response.data.files;
   } catch (err) {
     console.error('Error fetching peer files:', err.response?.data || err.message);

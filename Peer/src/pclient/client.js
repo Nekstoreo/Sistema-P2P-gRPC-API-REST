@@ -112,7 +112,6 @@ class Client {
       return res.status(400).json({ message: 'peerIp is required' });
     }
     try {
-      console.log('Indexing files for peer:', peerIp);
       const files = await searchService.getPeerFiles(peerIp, token);
       if (files) {
         res.json({ message: 'Files found on peer', files });

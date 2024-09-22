@@ -6,7 +6,6 @@ async function login(username, password) {
     throw new Error('Username and password are required');
   }
   try {
-    console.log(username, password);
     const token = await authService.login(username, password);
     return token;  // Return the token
   } catch (err) {
@@ -22,7 +21,6 @@ async function logout(token) {
   }
   try {
     await authService.logout({ headers: { 'Authorization': `Bearer ${token}` } });
-    console.log('Logout successful');
   } catch (err) {
     console.error('Logout failed:', err.message);
   }
