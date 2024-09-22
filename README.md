@@ -3,6 +3,8 @@
 
 Este proyecto consiste en un sistema peer-to-peer (P2P) donde múltiples pares se registran con un servidor de directorio central e intercambian archivos usando gRPC (Google Remote Procedure Call). Cada par puede subir y descargar archivos, buscar archivos en otros pares y manejar autenticación mediante tokens JWT.
 
+![P2P-Page-1 drawio](https://github.com/user-attachments/assets/2b37fc20-0811-498e-a523-b135d680db23)
+
 ## Componentes
 
 1. **Peers (Nodos)**:
