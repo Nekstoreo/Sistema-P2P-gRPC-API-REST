@@ -129,7 +129,7 @@ class Client {
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized. Please log in first.' });
     }
-    grpcService.downloadFile(filename, peerIp, token, (err, message) => {
+    grpcService.downloadFile(filename, peerIp, (err, message) => {
       if (err) {
         res.status(500).json({ error: 'Download failed', details: err.message });
       } else {

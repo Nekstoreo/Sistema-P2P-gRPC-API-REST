@@ -44,13 +44,11 @@ function downloadFile(filename, targetPeerIp, callback) {
   client.DownloadFile({ filename }, (err, response) => {
     if (err) return callback(err);
 
-    const filePath = path.join(peer_directory, filename);
-    fs.writeFile(filePath, response.data, (writeErr) => {
-      if (writeErr) return callback(writeErr);
-      console.log(`File ${filename} downloaded successfully to ${filePath}`);
-      callback(null, `File ${filename} downloaded successfully`);
-    });
+    console.log(`File ${filename} downloaded successfully`);
+    callback(null, `File ${filename} downloaded successfully`);
   });
 }
+
+module.exports = { uploadFile, downloadFile };
 
 module.exports = { uploadFile, downloadFile };
