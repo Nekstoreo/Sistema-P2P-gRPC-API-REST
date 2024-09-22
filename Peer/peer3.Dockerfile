@@ -16,6 +16,9 @@ COPY src/ .
 # Expone los puertos necesarios
 EXPOSE 5000 50051
 
+# Crear directorio shared si no existe
+RUN mkdir -p shared
+
 # Comando para crear archivos distintos en la carpeta shared
 RUN touch shared/beyonce.txt shared/ladygaga.txt
 
