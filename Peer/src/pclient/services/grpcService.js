@@ -28,10 +28,6 @@ if (!fileProto || !fileProto.FileService) {
 
 // Upload a file to another peer
 function uploadFile(filename, targetPeerIp, callback) {
-  if (typeof callback !== 'function') {
-    throw new TypeError('callback must be a function');
-  }
-
   const client = new fileProto.FileService(`${targetPeerIp}:${grpc_port}`, grpc.credentials.createInsecure());
 
   client.UploadFile({ filename }, (err, response) => {
@@ -41,12 +37,13 @@ function uploadFile(filename, targetPeerIp, callback) {
   });
 }
 
-// Download a file from another peer|
+// Download a file from another peer
 function downloadFile(filename, targetPeerIp, callback) {
   const client = new fileProto.FileService(`${targetPeerIp}:${grpc_port}`, grpc.credentials.createInsecure());
 
   client.DownloadFile({ filename }, (err, response) => {
     if (err) return callback(err);
+
     const filePath = path.join(peer_directory, filename);
     fs.writeFile(filePath, response.data, (writeErr) => {
       if (writeErr) return callback(writeErr);
