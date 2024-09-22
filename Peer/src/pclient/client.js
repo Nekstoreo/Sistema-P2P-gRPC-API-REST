@@ -144,7 +144,7 @@ class Client {
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized. Please log in first.' });
     }
-    grpcService.uploadFile(filename, peerIp, token, (err, message) => {
+    grpcService.uploadFile(filename, peerIp, (err, message) => {
       if (err) {
         res.status(500).json({ error: 'Upload failed', details: err.message });
       } else {
