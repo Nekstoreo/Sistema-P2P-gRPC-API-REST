@@ -13,6 +13,9 @@ RUN npm install
 # Copia el resto de los archivos de la aplicación al directorio de trabajo excepto node_modules
 COPY src/ .
 
+# Copia el archivo de configuración .env.peer
+COPY .env.peer .env
+
 # Expone los puertos necesarios
 EXPOSE 5000 50051
 
