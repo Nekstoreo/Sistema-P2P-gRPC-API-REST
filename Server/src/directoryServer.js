@@ -8,8 +8,8 @@ const peers = {};  // Store peer info { peerId: { ip, port, files } }
 
 // Register a peer
 app.post('/api/register', (req, res) => {
-  const { peerId, ip, port, files } = req.body;
-  peers[peerId] = { ip, port, files, lastActive: Date.now() };
+  const { peerId, ip, port, directory, files } = req.body;
+  peers[peerId] = { ip, port, directory, files, lastActive: Date.now() };
   console.log(`Peer registered: ${peerId} at ${ip}:${port}`);
   // Print files registered by the peer
   console.log(`Files registered by ${peerId}: ${files.join(', ')}`);
@@ -37,8 +37,14 @@ app.get('/api/files', (req, res) => {
   const { peerIp } = req.query;
   for (const peerId in peers) {
     if (peers[peerId].ip === peerIp) {
-      res.json({ files: peers[peerId].files });
-      return;
+      // return the files and their URIs
+      const files = peers[peerId].files.map(file => {
+        return {
+          file: file,
+          uri: `http://${peers[peerId].ip}:${peers[peerId].port}/${peers[peerId].directory}/${file}`
+        };
+      });
+      return res.json({ files });
     }
   }
   res.status(404).json({ message: 'Peer not found' });
