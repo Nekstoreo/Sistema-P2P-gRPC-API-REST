@@ -1,29 +1,30 @@
-const axios = require('axios');
-const config = require('../../config.json');
+const authService = require('./authService');
 
 // Login to the PeerServer using username and password
 async function login(username, password) {
+  if (!username || !password) {
+    throw new Error('Username and password are required');
+  }
   try {
-    const response = await axios.post(`http://${config.peer.ip}:${config.peer.server_port}/api/login`, {
-      username,
-      password
-    });
-    return response.data;  // Return the token
+    console.log(username, password);
+    const token = await authService.login(username, password);
+    return token;  // Return the token
   } catch (err) {
-    console.error('Login failed en loginservice:', err.response?.data || err.message);
+    console.error('Login failed in loginService:', err.message);
     throw err;
   }
 }
 
 // Logout from the PeerServer using the token
 async function logout(token) {
+  if (!token) {
+    throw new Error('Token is required');
+  }
   try {
-    const response = await axios.post(`http://${config.peer.ip}:${config.peer.server_port}/api/logout`, null, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    console.log('Logout successful:', response.data);
+    await authService.logout({ headers: { 'Authorization': `Bearer ${token}` } });
+    console.log('Logout successful');
   } catch (err) {
-    console.error('Logout failed:', err.response?.data || err.message);
+    console.error('Logout failed:', err.message);
   }
 }
 

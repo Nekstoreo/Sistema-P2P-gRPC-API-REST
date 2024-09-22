@@ -1,16 +1,23 @@
-// src/Client.js
 const express = require('express');
 const bodyParser = require('body-parser');
+const axios = require('axios');
 const loginService = require('./services/loginService');
 const searchService = require('./services/searchService');
 const grpcService = require('./services/grpcService');
-const axios = require('axios');
-const config = require('../config.json');
+const filesService = require('./services/filesService');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const peer_id = process.env.PEER_ID || 'peer1';
+const peer_ip = process.env.PEER_IP || 'localhost';
+const peer_port = process.env.PEER_PORT || 3000;
+const directory_server_ip = process.env.DIRECTORY_SERVER_IP || 'localhost';
+const directory_server_port = process.env.DIRECTORY_SERVER_PORT || 5000;
 
 class Client {
   constructor() {
     this.app = express();
-    this.token = '';
     this.app.use(bodyParser.json());
     this.setupRoutes();
   }
@@ -21,15 +28,16 @@ class Client {
     this.app.post('/api/search', this.search.bind(this));
     this.app.post('/api/download', this.download.bind(this));
     this.app.post('/api/upload', this.upload.bind(this));
+    this.app.post('/api/index', this.index.bind(this));
   }
 
   async registerPeer() {
     try {
       const files = await this.getFilesInDirectory();
-      const response = await axios.post(`http://${config.directory_server.ip}:${config.directory_server.port}/api/register`, {
-        peerId: config.peer.client_id,
-        ip: config.peer.ip,
-        port: config.peer.client_port,
+      const response = await axios.post(`http://${directory_server_ip}:${directory_server_port}/api/register`, {
+        peerId: peer_id,
+        ip: peer_ip,
+        port: peer_port,
         files
       });
       console.log('Peer registered:', response.data);
@@ -39,12 +47,11 @@ class Client {
   }
 
   async getFilesInDirectory() {
-    const fs = require('fs').promises;
     try {
-      const files = await fs.readdir(config.peer.directory);
-      return files;
+      const response = await filesService.listFiles();
+      return response.files;
     } catch (err) {
-      console.error('Error reading directory:', err.message);
+      console.error('Error fetching files from peer:', err.message);
       return [];
     }
   }
@@ -52,10 +59,9 @@ class Client {
   async login(req, res) {
     const { username, password } = req.body;
     try {
-      const loginResponse = await loginService.login(username, password);
-      if (loginResponse.token) {
-        this.token = loginResponse.token;
-        res.json({ message: 'Login successful', token: this.token });
+      const token = await loginService.login(username, password);
+      if (token) {
+        res.json({ message: 'Login successful', token });
       } else {
         res.status(401).json({ message: 'Login failed' });
       }
@@ -65,22 +71,27 @@ class Client {
   }
 
   async logout(req, res) {
-    try {
-      await loginService.logout(this.token);
-      this.token = '';
-      res.json({ message: 'Logout successful' });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
+    const token = req.headers.authorization?.split(' ')[1];
+    if (token) {
+      try {
+        await loginService.logout(token);
+        res.json({ message: 'Logout successful' });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    } else {
+      res.status(401).json({ message: 'Not logged in' });
     }
   }
 
   async search(req, res) {
+    const token = req.headers.authorization?.split(' ')[1];
     const { filename } = req.body;
-    if (!this.token) {
+    if (!token) {
       return res.status(401).json({ message: 'Unauthorized. Please log in first.' });
     }
     try {
-      const peersWithFile = await searchService.searchFile(filename, this.token);
+      const peersWithFile = await searchService.searchFile(filename, token);
       if (peersWithFile.length > 0) {
         res.json({ message: 'File found on peers', peers: peersWithFile });
       } else {
@@ -91,12 +102,35 @@ class Client {
     }
   }
 
-  download(req, res) {
-    const { filename, peerIp } = req.body;
-    if (!this.token) {
+  async index(req, res) {
+    const token = req.headers.authorization?.split(' ')[1];
+    const { peerIp } = req.body;
+    if (!token) {
       return res.status(401).json({ message: 'Unauthorized. Please log in first.' });
     }
-    grpcService.downloadFile(filename, peerIp, (err, message) => {
+    if (!peerIp) {
+      return res.status(400).json({ message: 'peerIp is required' });
+    }
+    try {
+      console.log('Indexing files for peer:', peerIp);
+      const files = await searchService.getPeerFiles(peerIp, token);
+      if (files) {
+        res.json({ message: 'Files found on peer', files });
+      } else {
+        res.json({ message: 'No files found on peer' });
+      }
+    } catch (err) {
+      res.status(500).json({ message: 'Error fetching files from peer: ', error: err.message });
+    }
+  }
+
+  download(req, res) {
+    const token = req.headers.authorization?.split(' ')[1];
+    const { filename, peerIp } = req.body;
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized. Please log in first.' });
+    }
+    grpcService.downloadFile(filename, peerIp, token, (err, message) => {
       if (err) {
         res.status(500).json({ error: 'Download failed', details: err.message });
       } else {
@@ -106,11 +140,12 @@ class Client {
   }
 
   upload(req, res) {
+    const token = req.headers.authorization?.split(' ')[1];
     const { filename, peerIp } = req.body;
-    if (!this.token) {
+    if (!token) {
       return res.status(401).json({ message: 'Unauthorized. Please log in first.' });
     }
-    grpcService.uploadFile(filename, peerIp, (err, message) => {
+    grpcService.uploadFile(filename, peerIp, token, (err, message) => {
       if (err) {
         res.status(500).json({ error: 'Upload failed', details: err.message });
       } else {
@@ -120,9 +155,9 @@ class Client {
   }
 
   start() {
-    this.app.listen(config.peer.client_port, async () => {
+    this.app.listen(peer_port, async () => {
       await this.registerPeer();
-      console.log(`PeerClient running on port ${config.peer.client_port}`);
+      console.log(`PeerClient running on port ${peer_port}`);
     });
   }
 }

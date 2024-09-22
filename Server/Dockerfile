@@ -1,18 +1,17 @@
-# Base image
+# Usa una imagen base de Node.js
 FROM node:20
 
-# Set working directory
+# Establece el directorio de trabajo en el contenedor
 WORKDIR /usr/src/app
 
-# Copy package.json and install dependencies
-COPY package*.json ./
+# Copia el resto de los archivos de la aplicación al directorio de trabajo
+COPY src/ .
+
+# Instala las dependencias
 RUN npm install
 
-# Copy the rest of the application files
-COPY . .
-
-# Expose port for Directory Server
+# Expone el puerto necesario
 EXPOSE 6000
 
-# Command to start the directory server
+# Comando para ejecutar la aplicación
 CMD ["node", "directoryServer.js"]

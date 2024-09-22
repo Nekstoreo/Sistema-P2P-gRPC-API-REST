@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  peer1:
+    build:
+      context: ./Peer
+      dockerfile: peer1.Dockerfile
+    container_name: peer1
+    networks:
+      custom_network:
+        ipv4_address: 172.20.0.2
+    ports:
+      - "5000:5000"
+      - "50051:50051"
+    env_file:
+      - Peer/.env.peer1
+
+  peer2:
+    build:
+      context: ./Peer
+      dockerfile: peer2.Dockerfile
+    container_name: peer2
+    networks:
+      custom_network:
+        ipv4_address: 172.20.0.3
+    ports:
+      - "5001:5000"
+      - "50052:50051"
+    env_file:
+      - Peer/.env.peer2
+
+  peer3:
+    build:
+      context: ./Peer
+      dockerfile: peer3.Dockerfile
+    container_name: peer3
+    networks:
+      custom_network:
+        ipv4_address: 172.20.0.4
+    ports:
+      - "5002:5000"
+      - "50053:50051"
+    env_file:
+      - Peer/.env.peer3
+
+  directory_server:
+    build:
+      context: ./Server 
+      dockerfile: Dockerfile
+    container_name: directory_server
+    networks:
+      custom_network:
+        ipv4_address: 172.20.0.5
+    ports:
+      - "6000:6000"
+
+networks:
+  custom_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 

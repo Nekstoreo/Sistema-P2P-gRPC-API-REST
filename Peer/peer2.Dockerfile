@@ -16,5 +16,8 @@ COPY src/ .
 # Expone los puertos necesarios
 EXPOSE 5000 50051
 
+# Comando para crear archivos distintos en la carpeta shared
+RUN touch shared/rihana.txt shared/ladygaga.txt
+
 # Comando para ejecutar la aplicación
 CMD ["node", "peer.js"]
